@@ -9,7 +9,7 @@ using Sentry.Extensibility;
 
 namespace Samples.AspNetCore.Mvc
 {
-    public class Startup
+    public class Startup : IStartup
     {
         public Startup(IConfiguration configuration)
         {
@@ -40,6 +40,18 @@ namespace Samples.AspNetCore.Mvc
             return new AutofacServiceProvider(container);
         }
 
+        public void Configure(IApplicationBuilder app)
+        {
+            app.UseStaticFiles();
+
+            app.UseMvc(routes =>
+            {
+                routes.MapRoute(
+                    name: "default",
+                    template: "{controller=Home}/{action=Index}/{id?}");
+            });
+        }
+
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
@@ -52,14 +64,7 @@ namespace Samples.AspNetCore.Mvc
                 app.UseExceptionHandler("/Home/Error");
             }
 
-            app.UseStaticFiles();
 
-            app.UseMvc(routes =>
-            {
-                routes.MapRoute(
-                    name: "default",
-                    template: "{controller=Home}/{action=Index}/{id?}");
-            });
         }
     }
 }
