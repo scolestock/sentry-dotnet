@@ -1,4 +1,6 @@
 using System;
+using System.IO;
+using System.Reflection;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
@@ -6,6 +8,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Sentry.Extensibility;
+using Swashbuckle.AspNetCore.Swagger;
 
 namespace Samples.AspNetCore.Mvc
 {
@@ -34,6 +37,14 @@ namespace Samples.AspNetCore.Mvc
 
             services.AddMvc();
 
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new Info { Title = "Sentry Sample", Version = "v1" });
+                var xmlFile = Assembly.GetExecutingAssembly().GetName().Name + ".xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                c.IncludeXmlComments(xmlPath);
+            });
+
             var builder = new ContainerBuilder();
             builder.Populate(services);
             var container = builder.Build();
@@ -44,27 +55,19 @@ namespace Samples.AspNetCore.Mvc
         {
             app.UseStaticFiles();
 
+            app.UseExceptionHandler("/Home/Error");
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
                     name: "default",
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
-        }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
-        {
-            if (env.IsDevelopment())
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
             {
-                app.UseDeveloperExceptionPage();
-            }
-            else
-            {
-                app.UseExceptionHandler("/Home/Error");
-            }
-
-
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "API");
+            });
         }
     }
 }

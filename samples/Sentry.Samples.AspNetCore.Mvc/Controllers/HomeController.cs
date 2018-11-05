@@ -19,6 +19,15 @@ namespace Samples.AspNetCore.Mvc.Controllers
             _logger = logger;
         }
 
+        /// <summary>
+        /// Throws an exception
+        /// </summary>
+        /// <remarks>
+        /// Visible through swagger
+        /// </remarks>
+        [HttpGet("exception")]
+        public void Throw() => throw new NotImplementedException("I throw.");
+
         [HttpGet]
         public IActionResult Index()
         {
